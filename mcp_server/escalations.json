@@ -1,0 +1,22 @@
+[
+  {
+    "escalation_id": "ESC-1789351615",
+    "customer_email": "test@example.com",
+    "category": "bug",
+    "priority": "high",
+    "reason": "Testing MCP connection directly",
+    "draft_reply": "This is a test draft reply.",
+    "created_at": "2026-09-14T07:36:55.341299",
+    "status": "pending_human_review"
+  },
+  {
+    "escalation_id": "ESC-1789352040",
+    "customer_email": "unknown",
+    "category": "bug",
+    "priority": "high",
+    "reason": "Low confidence score: 0.8",
+    "draft_reply": "Subject: We're Here to Help!\n\nHi [Customer's Name],\n\nI\u2019m sorry to hear that you\u2019re experiencing issues with our product. I understand how frustrating this can be, and I'm here to assist you.\n\nTo help us resolve this as quickly as possible, could you please provide a bit more information? Specifically, it would be helpful to know:\n\n1. The browser and operating system you are using.\n2. The steps you took before encountering the issue.\n3. Any screenshots that might illustrate the problem.\n\nIf you are currently using version 2.3.1, some users have reported getting stuck in a login loop after resetting their password. A temporary workaround is to clear your browser's cache and cookies, then try logging in again.\n\nOnce I have the additional details, I can assist you further and escalate the issue if needed.\n\nThank you for your patience, and I look forward to your response!\n\nBest regards,  \n[Your Name]  \nCustomer Support Team",
+    "created_at": "2026-09-14T07:44:00.384784",
+    "status": "pending_human_review"
+  }
+]

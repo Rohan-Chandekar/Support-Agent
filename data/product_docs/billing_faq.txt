@@ -1,0 +1,3 @@
+Refund Policy: Customers charged twice for the same billing cycle are eligible for an automatic refund of the duplicate charge within 5-7 business days. Support agents should verify the duplicate charge in the payment dashboard before confirming a refund.
+
+Subscription Cancellation: Customers can cancel anytime from Account > Billing > Cancel Subscription. Cancellation takes effect at the end of the current billing cycle, no partial refunds are issued for unused days.

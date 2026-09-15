@@ -1,0 +1,24 @@
+Why this specific design is interview-relevant
+
+1. RAG (2 sources) → shows you know grounding isn't optional; an LLM drafting billing refund answers without reading your actual refund policy is a liability, not a feature.
+2. Conditional edge on confidence → shows you understand that agentic systems need a way to not act when uncertain — this is the #1 thing real companies worry about with LLM automation (a wrong auto-reply to a customer is worse than a slower human reply).
+3. MCP for escalation → shows you can integrate the agent with external systems (e.g., a ticketing tool) the way it'd actually plug into a real support stack, rather than just printing to console.
+4. Custom tool (SLA calculator) → shows you can extend an agent with deterministic business logic, not just LLM calls — interviewers like seeing that not everything is "ask the LLM."
+
+So in one sentence, if asked in an interview: "I built an agentic ticket-triage system in LangGraph that classifies incoming tickets, retrieves grounding context from two different knowledge sources, drafts a response, and — critically — routes to either auto-resolution or human escalation based on a confidence check, with the escalation calling an external tool via MCP."
+
+
+DAY 2 interview Framings
+
+Interview framing
+
+"I chunked the docs with overlap so retrieval returns focused, complete facts rather than whole documents or mid-sentence cuts, and I built the vector index once at startup rather than per-request — in production this would be a persistent, incrementally-updated store instead of an in-memory one rebuilt on process start."
+
+
+(Small note for later: right now these two RAG lookups run one after another, purely sequentially. A production improvement — worth mentioning in your README/interview — would be to run them in parallel since they don't depend on each other's output, using LangGraph's fan-out/fan-in pattern. We're keeping it sequential for now to keep the graph easy to reason about while learning.)
+
+
+
+Day 3 mcp
+
+Side note for your README/interview later: this is a good real example to mention — "I pinned mcp<2 after hitting a breaking API rename in the SDK, which is a common real-world consideration when depending on a fast-moving protocol library.")

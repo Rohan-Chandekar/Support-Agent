@@ -1,0 +1,5 @@
+Ticket #1021 (billing, resolved): Customer reported being billed twice in one cycle. Agent verified duplicate charge in payment dashboard and issued refund within 5 business days. Customer confirmed refund received, ticket closed satisfied.
+
+Ticket #1035 (bug, resolved): Customer stuck in login loop after resetting password on version 2.3.1. Agent advised clearing browser cache and cookies. Issue resolved, customer informed that a permanent fix is coming in 2.4.0.
+
+Ticket #1048 (how_to, resolved): Customer asked how to export a large dataset. Agent explained exports over 10,000 rows are sent via email asynchronously. Customer satisfied with explanation, no further action needed.

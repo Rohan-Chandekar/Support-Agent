@@ -1,0 +1,3 @@
+Known Issue - Login Loop: Some users on version 2.3.1 experience a login loop after password reset. Workaround: clear browser cache and cookies, then log in again. Fix is scheduled for version 2.4.0.
+
+Bug Report Process: When a user reports a bug, ask for browser/OS version, steps to reproduce, and screenshots if possible. File to the engineering queue with priority based on user impact.
