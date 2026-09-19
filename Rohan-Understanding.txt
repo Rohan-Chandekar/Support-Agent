@@ -1,24 +1,44 @@
-Why this specific design is interview-relevant
+1. main.py starts things off
+It calls build_graph() (from graph.py) to construct the pipeline, then calls .invoke({"raw_ticket": "..."}) — this is the starting package, containing just the raw customer message.
 
-1. RAG (2 sources) → shows you know grounding isn't optional; an LLM drafting billing refund answers without reading your actual refund policy is a liability, not a feature.
-2. Conditional edge on confidence → shows you understand that agentic systems need a way to not act when uncertain — this is the #1 thing real companies worry about with LLM automation (a wrong auto-reply to a customer is worse than a slower human reply).
-3. MCP for escalation → shows you can integrate the agent with external systems (e.g., a ticketing tool) the way it'd actually plug into a real support stack, rather than just printing to console.
-4. Custom tool (SLA calculator) → shows you can extend an agent with deterministic business logic, not just LLM calls — interviewers like seeing that not everything is "ask the LLM."
+2. preprocess.py runs first
+Reads raw_ticket. Cleans whitespace, tries to find an email with a regex. Adds clean_text and customer_email to the package. No AI involved — just string manipulation.
 
-So in one sentence, if asked in an interview: "I built an agentic ticket-triage system in LangGraph that classifies incoming tickets, retrieves grounding context from two different knowledge sources, drafts a response, and — critically — routes to either auto-resolution or human escalation based on a confidence check, with the escalation calling an external tool via MCP."
+3. classify.py runs next
+Reads clean_text. Sends it to gpt-4o-mini with instructions to output a category (billing/bug/how_to/other) and priority (low/medium/high) — using a Pydantic schema so the answer is guaranteed to be one of those exact values, not free text. Adds category and priority to the package.
+
+4. rag_docs.py runs next
+This is where rag/product_docs_store.py comes in. At program startup (not every request — just once), that file read all .txt files in data/product_docs/, chopped them into small chunks, converted each chunk into a list of numbers (an "embedding") representing its meaning, and stored them in a searchable index (FAISS). Now, rag_docs.py takes clean_text, converts it to numbers the same way, and asks the index "which stored chunks are closest in meaning to this?" It gets back the 2 most relevant chunks and adds them as doc_context.
+
+5. rag_tickets.py runs the same way, but against past_tickets_store.py's index instead — a different knowledge source (real precedent cases instead of policy text). Adds ticket_context.
+
+6. sla.py runs next
+Reads category and priority from the package. Looks them up in a plain lookup table (tools/sla_tool.py) to get a number of hours (e.g., billing+high = 4 hours). No AI — just a dictionary lookup and a date calculation. Adds sla_hours and sla_deadline.
+
+7. generate.py runs next
+This is the first node that actually uses everything gathered so far. It builds one big prompt containing: the customer's message, the category/priority, the SLA, doc_context, and ticket_context — and asks gpt-4o-mini to write a reply grounded in all of it. Adds draft_reply.
+
+8. validate.py runs next
+Takes draft_reply and asks a separate gpt-4o-mini call: "how confident are you that this reply is safe to send as-is, without a human checking it?" Returns a number 0.0–1.0. Adds confidence.
+
+9. Decision point — the conditional edge
+graph.py contains a function route_after_validation(state) that checks: is confidence >= 0.7? If yes, the graph goes to format_reply.py. If no, it goes to escalate.py. This is the only place in the whole graph where the next step isn't fixed in advance — it depends on what happened earlier.
+
+10a. If confident → format_reply.py
+Takes draft_reply, appends a small footer (priority + SLA), calls it final_reply, marks escalated: False. Done — this is the "auto-resolved" outcome.
+
+10b. If not confident → escalate.py
+This node doesn't call an LLM at all. It calls mcp_client/escalation_client.py, which:
+
+launches mcp_server/escalation_server.py as a separate background process,
+sends it a request: "please create an escalation ticket with these details,"
+the server writes that request into mcp_server/escalations.json (standing in for a real ticketing system),
+the server replies "done, here's the ID,"
+escalate.py marks final_reply: None, escalated: True.
+
+11. Either way, the graph reaches END, and main.py prints the final, fully-accumulated package.
+
+That's the entire project. Nothing more is happening than what's above — every file's job is one of: clean data, ask an LLM a narrow question, search an index, do a lookup, or call an external service.
 
 
-DAY 2 interview Framings
-
-Interview framing
-
-"I chunked the docs with overlap so retrieval returns focused, complete facts rather than whole documents or mid-sentence cuts, and I built the vector index once at startup rather than per-request — in production this would be a persistent, incrementally-updated store instead of an in-memory one rebuilt on process start."
-
-
-(Small note for later: right now these two RAG lookups run one after another, purely sequentially. A production improvement — worth mentioning in your README/interview — would be to run them in parallel since they don't depend on each other's output, using LangGraph's fan-out/fan-in pattern. We're keeping it sequential for now to keep the graph easy to reason about while learning.)
-
-
-
-Day 3 mcp
-
-Side note for your README/interview later: this is a good real example to mention — "I pinned mcp<2 after hitting a breaking API rename in the SDK, which is a common real-world consideration when depending on a fast-moving protocol library.")
+streamlit run streamlit_app.py
